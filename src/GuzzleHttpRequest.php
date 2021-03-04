@@ -321,8 +321,7 @@ class GuzzleHttpRequest implements HttpRequestInterface
                 // 同步
                 foreach ($requests as $request) {
                     $httpRequest = new SyncGuzzleHttpRequest();
-                    $httpRequest
-                        ->setRequester($request);
+                    $httpRequest->setRequest($request);
                     $this->hasSetRetry() && $httpRequest->setRetry($this->_retry);
 
                     $resultList = null;

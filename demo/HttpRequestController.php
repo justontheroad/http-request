@@ -8,7 +8,6 @@ use justontheroad\HttpRequest\{
     GuzzleHttpRequestBuilder,
     GuzzleHttpRequestRetry,
     GuzzleHttpRequest,
-    GuzzleHttpRequestTest,
     HttpRequestRedisCache
 };
 use yii\web\Controller;
@@ -76,7 +75,7 @@ class TestHttpRequestController extends Controller
         $header = [];
         $uids   = [];
         $url    = 'http://www.base.com.master.php7.egomsl.com/api/pipeline/items';
-        $uids[$url] = $sync->setRequester(
+        $uids[$url] = $sync->setRequest(
             new GuzzleHttpRequestBuilder($url, GuzzleHttpRequestBuilder::METHOD_POST, [
                 'site'   => 'ZF',
                 'apiId' => '81194069E82FFDFE',
@@ -101,7 +100,7 @@ class TestHttpRequestController extends Controller
         $header = [];
         $uids   = [];
         $url    = 'http://www.base.com.local.php7.egomsl.com/api/pipeline/items';
-        $uids[$url] = $sync->setRequester(
+        $uids[$url] = $sync->setRequest(
             new GuzzleHttpRequestBuilder($url, GuzzleHttpRequestBuilder::METHOD_POST, [
                 'site'   => 'ZF',
                 'apiId' => '81194069E82FFDFE',
@@ -343,103 +342,5 @@ class TestHttpRequestController extends Controller
         // } catch (\Exception $e) {
         //     return $e;
         // }
-    }
-
-    public function actionTestFactory(): string
-    {
-        $params  = Yii::$app->request->get();
-        $async   = $params['async'] ?? false;
-        $cache   = $params['cache'] ?? false;
-        $retry   = $params['retry'] ?? false;
-        $options = [
-            \GuzzleHttp\RequestOptions::ALLOW_REDIRECTS => false
-        ]; // 禁止重定向
-        $header  = [];
-        $client = GuzzleHttpRequestTest::create();
-        $async && $client->async();
-        $retry && $client->setRetry(new GuzzleHttpRequestRetry(2, 1000));
-        $cache && $client->setCache(new HttpRequestRedisCache('base:http_request_api:', 60, 6));
-        $client
-            // ->setRetry(new GuzzleHttpRequestRetry(2, 1000))
-            // ->setCache(new HttpRequestRedisCache('base:http_request_api:', 60, 6))
-            // ->setOptions($options)
-            ->appendRequest(
-                $requester1 = new GuzzleHttpRequestBuilder(
-                    'http://www.base.com.xxx.php7.egomsl.com/api/pipeline/items', // 测试404
-                    GuzzleHttpRequestBuilder::METHOD_POST,
-                    [
-                        'site'   => 'ZF',
-                        'apiId' => '81194069E82FFDFE',
-                        'token' => 'acc4fcecd5bc0e46b1849aedb69ccf38'
-                    ],
-                    $header,
-                    2
-                )
-            )
-            ->appendRequest(
-                $requester2 = new GuzzleHttpRequestBuilder(
-                    'http://www.base.com.xxx.php7.egomsl.com/api/pipeline/items', // 测试404
-                    GuzzleHttpRequestBuilder::METHOD_POST,
-                    [
-                        'site'   => 'ZF',
-                        'apiId' => '81194069E82FFDFE',
-                        'token' => 'acc4fcecd5bc0e46b1849aedb69ccf38'
-                    ],
-                    $header,
-                    2,
-                    3333
-                )
-            )
-            ->appendRequest(
-                $requester3 = new GuzzleHttpRequestBuilder(
-                    'http://www.base.com.master.php7.egomsl.com/api/pipeline/items',
-                    GuzzleHttpRequestBuilder::METHOD_POST,
-                    [
-                        'site'   => 'ZF',
-                        'apiId' => '81194069E82FFDFE',
-                        'token' => 'acc4fcecd5bc0e46b1849aedb69ccf38'
-                    ],
-                    $header,
-                    3
-                )
-            )
-            ->appendRequest(
-                $requester4 = new GuzzleHttpRequestBuilder(
-                    'http://www.base.com.master.php7.egomsl.com/api/category/items',
-                    GuzzleHttpRequestBuilder::METHOD_POST,
-                    [
-                        'site'   => 'ZF',
-                        'apiId' => '81194069E82FFDFE',
-                        'token' => 'acc4fcecd5bc0e46b1849aedb69ccf38'
-                    ],
-                    $header
-                )
-            )
-            ->appendRequest(
-                $requester5 = new GuzzleHttpRequestBuilder(
-                    'http://www.base.com.master.php7.egomsl.com/category/api/goods-shop-api/calculate',
-                    GuzzleHttpRequestBuilder::METHOD_POST,
-                    [
-                        'site' => 'ZF',
-                        'apiId' => '81194069E82FFDFE',
-                        'token' => '123',
-                        'pipelineId' => '1',
-                        'goodsList'  => '[{"key":"goodsList","value":"[{\"goods_id\":\"566352\",\"cateid\":\"1\",\"goods_sn\":\"205842606\",\"chuhuo_price\":\"43\",\"goods_volume_weight\":\"10\",\"is_free_shipping\":\"1\"},{\"goods_id\":\"5879\",\"cateid\":\"54\",\"goods_sn\":\"113892505\",\"chuhuo_price\":\"103\",\"goods_volume_weight\":\"0.650\",\"is_free_shipping\":\"1\"}]","description":"","type":"text","enabled":true}]',
-                        'goodsSnArr' => '257041803,257041802'
-                    ],
-                    $header
-                )
-            );
-
-        $requester1->setOptions($options);
-        $requester2->setOptions($options);
-        $requester3->setOptions($options);
-        $requester4->setOptions($options);
-        $requester5->setOptions($options);
-
-        $client->request();
-        list($resultList, $failedList) = $client->getResult();
-
-        return json_encode(['success' => $resultList, 'failed' => $failedList]);
     }
 }

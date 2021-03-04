@@ -44,12 +44,12 @@ class SyncGuzzleHttpRequest extends AbstractGuzzleHttpRequest implements HttpReq
     // }
 
     /**
-     * 设置请求程序
+     * 设置请求
      *
      * @param HttpRequestBuilderInterface $request  请求 
      * @return string                               $uid
      */
-    public function setRequester(HttpRequestBuilderInterface $request)
+    public function setRequest(HttpRequestBuilderInterface $request)
     {
         $this->_requestList[$request->uid] = $request;
         return $request->uid;
