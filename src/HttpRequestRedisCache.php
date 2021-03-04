@@ -56,7 +56,6 @@ class HttpRequestRedisCache implements HttpRequestCacheInterface
      * @param string $redisKeyPrefix    redis key 前缀，默认 base:http_request_api
      * @param integer $expire           数据过期时间，默认 60s
      * @param integer $emptyExpire      空值或异常时的过期时间，默认 6s
-     * @throws Exception                必要配置异常
      */
     public function __construct($redis, string $redisKeyPrefix = 'base:http_request_api:', int $expire = 60, int $emptyExpire = 6)
     {
@@ -64,10 +63,6 @@ class HttpRequestRedisCache implements HttpRequestCacheInterface
         $this->_redisKeyPrefix = $redisKeyPrefix;
         $this->_expire         = $expire;
         $this->_emptyExpire    = $emptyExpire;
-
-        if (!method_exists($this->_redis, 'get') || !method_exists($this->_redis, 'setex') || !method_exists($this->_redis, 'del')) {
-            throw new Exception('redis 实例缺少方法，get|setex|del', 500);
-        }
     }
 
     /**
