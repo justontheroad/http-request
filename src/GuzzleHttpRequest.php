@@ -210,7 +210,7 @@ class GuzzleHttpRequest implements HttpRequestInterface
      * 追加请求
      *
      * @param HttpRequestBuilderInterface $request  请求 
-     * @param static
+     * @return static
      */
     public function appendRequest(HttpRequestBuilderInterface $request)
     {
@@ -222,7 +222,7 @@ class GuzzleHttpRequest implements HttpRequestInterface
      * 设置请求
      *
      * @param HttpRequestBuilderInterface $request  请求 
-     * @param static
+     * @return static
      */
     public function setRequest(HttpRequestBuilderInterface $request)
     {

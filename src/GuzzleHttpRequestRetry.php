@@ -15,6 +15,7 @@ use GuzzleHttp\Exception\{
 
 /**
  * Guzzle HTTP 请求重试
+ * 
  */
 class GuzzleHttpRequestRetry implements HttpRetryInterface
 {

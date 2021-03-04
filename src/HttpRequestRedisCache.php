@@ -2,6 +2,8 @@
 
 namespace justontheroad\HttpRequest;
 
+use \Exception as Exception;
+
 /**
  * HTTP请求缓存
  * 
@@ -54,6 +56,7 @@ class HttpRequestRedisCache implements HttpRequestCacheInterface
      * @param string $redisKeyPrefix    redis key 前缀，默认 base:http_request_api
      * @param integer $expire           数据过期时间，默认 60s
      * @param integer $emptyExpire      空值或异常时的过期时间，默认 6s
+     * @throws Exception                必要配置异常
      */
     public function __construct($redis, string $redisKeyPrefix = 'base:http_request_api:', int $expire = 60, int $emptyExpire = 6)
     {
@@ -61,6 +64,10 @@ class HttpRequestRedisCache implements HttpRequestCacheInterface
         $this->_redisKeyPrefix = $redisKeyPrefix;
         $this->_expire         = $expire;
         $this->_emptyExpire    = $emptyExpire;
+
+        if (!method_exists($this->_redis, 'get') || !method_exists($this->_redis, 'setex') || !method_exists($this->_redis, 'del')) {
+            throw new Exception('redis 实例缺少方法，get|setex|del', 500);
+        }
     }
 
     /**
@@ -73,12 +80,11 @@ class HttpRequestRedisCache implements HttpRequestCacheInterface
      */
     public function set(string $key, $value)
     {
-        $key    = $this->getKey($key);
+        $key = $this->getKey($key);
         if (!empty($value)) {
-            // $ret = $this->_redis->getRedisOperateObj()->setex($key, $this->_expire, json_encode($value, JSON_UNESCAPED_UNICODE));
-            $ret = $this->_redis->getRedisOperateObj()->setex($key, $this->_expire, serialize($value));
+            $ret = $this->_redis->setex($key, $this->_expire, serialize($value));
         } else {
-            $ret = $this->_redis->getRedisOperateObj()->setex($key, $this->_emptyExpire, '');
+            $ret = $this->_redis->setex($key, $this->_emptyExpire, '');
         }
 
         return $ret;
@@ -92,15 +98,14 @@ class HttpRequestRedisCache implements HttpRequestCacheInterface
      */
     public function get(string $key)
     {
-        $key    = $this->getKey($key);
-        $data   = $this->_redis->getRedisOperateObj()->get($key);
+        $key  = $this->getKey($key);
+        $data = $this->_redis->get($key);
         if (is_null($data) || false === $data) {
             return null;
         } else if (empty($data)) {
             return [];
         }
 
-        // return json_decode($data, true);
         return unserialize($data);
     }
 
@@ -112,8 +117,8 @@ class HttpRequestRedisCache implements HttpRequestCacheInterface
      */
     public function delete(string $key)
     {
-        $key    = $this->getKey($key);
-        $this->_redis->getRedisOperateObj()->del($key);
+        $key = $this->getKey($key);
+        $this->_redis->del($key);
     }
 
     /**
